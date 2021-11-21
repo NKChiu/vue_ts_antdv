@@ -12,6 +12,26 @@
                             <a-row>
                                 <div style="font-size:40px; padding-left: 20px; color:white;">MENU</div>
                             </a-row>
+                            <a-row>
+                                <a-menu
+                                mode="inline"
+                                theme="dark"
+                                :inlineCollapsed="collapsed"
+                                v-model="selectedKeys"
+                                :openKeys="openKeys"
+                                @openChange="onOpenChange"
+                                @click="itemClick">
+                                    <template v-for="item in menuItems">
+                                        <a-menu-item v-if="!item.children" :key="item.path">
+                                        <router-link :to="{ path: item.path}">
+                                            <a-icon :type="item.icon" filled-color="black" style="font-size:20px"></a-icon>
+                                            <span>{{ item.title}}</span>
+                                        </router-link>
+                                        </a-menu-item>
+                                        <sub-menu v-else :menuInfo="item" :key="item.path"/>
+                                    </template>
+                                </a-menu>
+                            </a-row>
                         </div>
                     </a-col>
                  </a-row>
@@ -20,21 +40,23 @@
 
             <a-layout :style="{ marginLeft:'200px', overflow: 'hidden'}">
                 <a-layout-header :style="{ background: '#FFF', padding: 0}">
-                    <a-page-header :title="'TITLE'" :subTitle="'subtitle'">
+                    <a-page-header :title="title" :subTitle="subTitle">
                          <template slot="extra">
                             <a-row style="width:130px">
                                 <a-col :span="12" style="margin-top:5px">
-                                    <label name="" style="font-size:16px; text-align:center">{{ 'user' }}</label>
+                                    <label name="" style="font-size:16px; text-align:center">{{ avatarText }}</label>
                                 </a-col>
                                 <a-col :span="12">
                                     <a-dropdown>
                                         <a-avatar
                                             icon="user"
                                             :style="{ 'background-color': '#99bd49'}">
-                                            {{ 'user' }}
+                                            {{ avatarText }}
                                         </a-avatar>
                                         <a-menu slot="overlay">
-                                            
+                                            <a-menu-item v-for="action in avatarActions" :key="action.name">
+                                                <a @click="onAvatarAction(action)">{{ action.title }}</a>
+                                            </a-menu-item>
                                         </a-menu>
                                     </a-dropdown>
                                 </a-col>
@@ -44,7 +66,9 @@
                 </a-layout-header>
 
                 <a-layout-content style="background:#fff">
-                    <div class="inner-content"></div>
+                    <div class="inner-content">
+                        <router-view/>
+                    </div>
                 </a-layout-content>
             </a-layout>
 
@@ -55,12 +79,153 @@
 
 <script lang="ts">
 
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator';
+import SubMenu from '@/components/SubMenu.vue';
+import {AvatarAction} from './model';
 
 @Component({
-    components:{}
+    components:{SubMenu}
 })
 export default class Layout extends Vue{
+
+    public title: string = "TITLE";
+    public subTitle: string = "subtitle";
+    public avatarText: string = "user";
     
+    public avatarActions: AvatarAction[]=[
+        {
+            name: "logout",
+            title: "登出",
+        }
+    ];
+    
+    public collapsed: boolean = false;
+    public selectedKeys: Array<any> = [];
+    public openKeys: Array<any> = [];
+    
+    public menuMap: Object = {};
+
+    public menuItems: Object[] = [
+          {
+              key:"/",
+              title:"MENU1",
+              path:"/",
+              uri: "/",
+              icon: "home",
+              children:[
+                {
+                    key:"/menu1/page1",
+                    title:"title1",
+                    path:"/menu1/page1",
+                    uri: "/menu1/page1",
+                    icon: "tool",
+                    disabled:false,
+                    parentId: ""
+                },
+                {
+                    key:"/menu1/page2",
+                    title:"title2",
+                    path:"/menu1/page2",
+                    uri: "/menu1/page2",
+                    icon: "tool",
+                    
+                    disabled:false,
+                    parentId: ""
+                }
+
+              ],
+              disabled:false,
+              parentId: ""
+          },
+          {
+              key:"/menu2",
+              title:"MENU2",
+              path:"",
+              uri: "",
+              icon: "file",
+              children:[
+                {
+                    key:"/menu2/page3",
+                    title:"title3",
+                    path:"/menu2/page3",
+                    uri: "/menu2/page3",
+                    icon: "tool",
+                    disabled:false,
+                    parentId: ""
+                },
+                {
+                    key:"/menu2/page4",
+                    title:"title4",
+                    path:"/menu2/page4",
+                    uri: "/menu2/page4",
+                    icon: "tool",
+                    
+                    disabled:false,
+                    parentId: ""
+                }
+
+              ],
+              disabled:false,
+              parentId: ""
+          },
+         
+    ]
+
+
+    created(){
+        this.menuItems.forEach((m)=> this.pushMenuMap(m));
+    }
+    
+    pushMenuMap(item){
+
+        if(item.key){
+            this.menuMap[item.key] = {
+            title: item.title,
+            path: item.path,
+            uri: item.uri,
+            icon: item.icon,
+            disabled: item.disabled,
+            parentId: item.parentId
+            }
+        }
+        if(item.children){
+            item.children.forEach((m) => this.pushMenuMap(m));
+        }
+      
+    }
+
+    onOpenChange(curOpenKey) {
+      var latestOpenKey: string[] = new Array;
+      console.log(curOpenKey.length);
+
+      if(curOpenKey.length == 0){
+        // latestOpenKey.push(curOpenKey[curOpenKey.length-1]);
+        this.openKeys = latestOpenKey;
+      }else{
+        latestOpenKey.push(curOpenKey[curOpenKey.length-1]);
+        this.openKeys = latestOpenKey;
+      }
+    }
+
+    itemClick({ item, key, keyPath }) {
+        console.log("args1", item);
+        console.log("args2", key);
+        console.log("args3", keyPath);
+
+        this.subTitle = this.menuMap[key].title;
+    }
+
+
+    onAvatarAction(action: AvatarAction){
+        switch(action.name){
+            case "logout":
+                this.signOut();
+                break;
+        }
+    }
+
+    signOut(){
+        console.log("signOut....");
+    }
 }
 </script>
