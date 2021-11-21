@@ -1,7 +1,6 @@
 <template>
   <div>
-    Page1
-    
+      Page1
   </div>
 </template>
 

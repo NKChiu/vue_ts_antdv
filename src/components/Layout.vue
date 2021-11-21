@@ -6,7 +6,7 @@
                 :style="{overflowX:'auto', overflow:'overlay', height:'100vh', position:'fixed', left:0, paddingRight:'5px'}"
                 theme="dark">
 
-                <a-row style="overflow-x: hidden;">
+                <a-row style="overflow-x: hidden; overflow-y:hidden">
                     <a-col :span="22">
                         <div style="height:100%; padding-top: 30px; font-weight:bold">
                             <a-row>
@@ -81,7 +81,7 @@
 
 import { Component, Vue } from 'vue-property-decorator';
 import SubMenu from '@/components/SubMenu.vue';
-import {AvatarAction} from './model';
+import {AvatarAction, MenuItems} from './model';
 
 @Component({
     components:{SubMenu}
@@ -98,82 +98,19 @@ export default class Layout extends Vue{
             title: "登出",
         }
     ];
-    
+
     public collapsed: boolean = false;
     public selectedKeys: Array<any> = [];
     public openKeys: Array<any> = [];
     
     public menuMap: Object = {};
 
-    public menuItems: Object[] = [
-          {
-              key:"/",
-              title:"MENU1",
-              path:"/",
-              uri: "/",
-              icon: "home",
-              children:[
-                {
-                    key:"/menu1/page1",
-                    title:"title1",
-                    path:"/menu1/page1",
-                    uri: "/menu1/page1",
-                    icon: "tool",
-                    disabled:false,
-                    parentId: ""
-                },
-                {
-                    key:"/menu1/page2",
-                    title:"title2",
-                    path:"/menu1/page2",
-                    uri: "/menu1/page2",
-                    icon: "tool",
-                    
-                    disabled:false,
-                    parentId: ""
-                }
-
-              ],
-              disabled:false,
-              parentId: ""
-          },
-          {
-              key:"/menu2",
-              title:"MENU2",
-              path:"",
-              uri: "",
-              icon: "file",
-              children:[
-                {
-                    key:"/menu2/page3",
-                    title:"title3",
-                    path:"/menu2/page3",
-                    uri: "/menu2/page3",
-                    icon: "tool",
-                    disabled:false,
-                    parentId: ""
-                },
-                {
-                    key:"/menu2/page4",
-                    title:"title4",
-                    path:"/menu2/page4",
-                    uri: "/menu2/page4",
-                    icon: "tool",
-                    
-                    disabled:false,
-                    parentId: ""
-                }
-
-              ],
-              disabled:false,
-              parentId: ""
-          },
-         
-    ]
+    public menuItems = MenuItems;
 
 
     created(){
         this.menuItems.forEach((m)=> this.pushMenuMap(m));
+        
     }
     
     pushMenuMap(item){
@@ -196,7 +133,6 @@ export default class Layout extends Vue{
 
     onOpenChange(curOpenKey) {
       var latestOpenKey: string[] = new Array;
-      console.log(curOpenKey.length);
 
       if(curOpenKey.length == 0){
         // latestOpenKey.push(curOpenKey[curOpenKey.length-1]);
@@ -208,10 +144,6 @@ export default class Layout extends Vue{
     }
 
     itemClick({ item, key, keyPath }) {
-        console.log("args1", item);
-        console.log("args2", key);
-        console.log("args3", keyPath);
-
         this.subTitle = this.menuMap[key].title;
     }
 
