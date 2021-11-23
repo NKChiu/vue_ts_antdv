@@ -82,6 +82,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import SubMenu from '@/components/SubMenu.vue';
 import {AvatarAction, MenuItems} from './model';
+import axios from 'axios';
 
 @Component({
     components:{SubMenu}
@@ -107,9 +108,21 @@ export default class Layout extends Vue{
 
     public menuItems = MenuItems;
 
-
+    
     created(){
-        this.menuItems.forEach((m)=> this.pushMenuMap(m));
+        /**
+         * 讀取 model.ts menu
+         */
+        // this.menuItems.forEach((m)=> this.pushMenuMap(m));
+        
+        /**
+         * 使用 axios 讀取 前端 local menu
+         */
+        axios.get('/config/menu.json').then((resp)=>{
+            if(resp){
+                resp.data.forEach((m)=> this.pushMenuMap(m));
+            }
+        })
         
     }
     
